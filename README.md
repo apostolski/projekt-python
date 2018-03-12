@@ -1,7 +1,7 @@
 # projekt-python
 Projekt języka skryptowego
 
-<1h>Projekt ogólny:
+<h1>Projekt ogólny:
 Skrypt do odczytu ruchów z kamery i tłumaczenia ich na instrukcje dla postaci na ekranie w celu mimiki osoby
 
 Zadania: 
