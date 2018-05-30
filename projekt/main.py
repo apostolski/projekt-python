@@ -9,6 +9,7 @@ start=time.time()
 lefthand=[300,0];
 timer=0
 cam = cv2.VideoCapture(0)
+
 cv2.namedWindow("test")
 fgbg = cv2.createBackgroundSubtractorMOG2()
 counter=0
@@ -31,6 +32,7 @@ while True:
             if x<lefthand[0]:
                 lefthand=[x,y]
     ret, frame = cam.read()
+    frame=cv2.flip(frame, 1 )
     frame = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
     fgmask = fgbg.apply(frame)
     cv2.imshow("test", fgmask)
