@@ -34,7 +34,8 @@ def sprawdzhitboxa(Obiekt,x,y):
     dlugosc_krzywej_y=math.sqrt(Obiekt.dol**2+Obiekt.prawo**2)
     wspolczynniky=dlugosc_krzywej_y/odleglosc_y
     wspolczynnikx=dlugosc_krzywej_x/odleglosc_x
-    if ((y>(x*Obiekt.rownaniepp[0]+Obiekt.rownaniepp[1])and y<(x*Obiekt.rownanie[0]+Obiekt.rownanie[1])) and y>((x*Obiekt.rownanie[0]+Obiekt.rownanie[1])-(Obiekt.dol*wspolczynnikx)) and (y<(x*Obiekt.rownaniepp[0]+Obiekt.rownaniepp[1]+dlugosc_krzywej_x*Obiekt.rownaniepp[0]*(-1)))):
+    boola=(y>(x*Obiekt.rownaniepp[0]+Obiekt.rownaniepp[1])and y<(x*Obiekt.rownanie[0]+Obiekt.rownanie[1])) and y>((x*Obiekt.rownanie[0]+Obiekt.rownanie[1])-(Obiekt.dol*wspolczynnikx)) and (y<(x*Obiekt.rownaniepp[0]+Obiekt.rownaniepp[1]+dlugosc_krzywej_x*Obiekt.rownaniepp[0]*(-1)))
+    if (boola):
         return True
     else:
         return False
@@ -55,9 +56,15 @@ cv2.createTrackbar('Odleglosc pomiedzy punktami','test',10,255,nothing)
 cv2.createTrackbar('Czulosc','test',2,10,nothing)
 dystans=30
 plt.show()
+Figura=[[[272,554],[334,478],110],[[52,232],[426,464],490]]
 Proba=core_prosta([275,495],[296,417],50)
-
-
+Hitboxy=[]
+Figury=[]
+for x in Figura:
+    Hitboxy.append(core_prosta(x[0],x[1],x[2]))
+for x in Hitboxy:
+    Figury.append(Hitboxy)
+    
 while True:
     
     dab = cv2.resize(dab, (640, 480)) 
@@ -66,7 +73,7 @@ while True:
     frame=cv2.flip(frame, 1 )
     ########################################
     
-    dst = cv2.addWeighted(frame,0.7,dab,0.3,0)
+    dst = cv2.addWeighted(frame,0.7,dab,0.3,0)  #Łączenie obrazu i nakładki z kanałem alpha
      
     # Display image
 
@@ -79,6 +86,10 @@ while True:
     punkty=cv2.getTrackbarPos('Ilosc punktow','test')
     silka=cv2.getTrackbarPos('Odleglosc pomiedzy punktami','test')
     czulkosc=cv2.getTrackbarPos('Czulosc','test')
+    if czulkosc==-1:
+        cam.release()
+        cv2.destroyAllWindows() #Jezeli okno zostalo zamkniete
+        break
     czulkosc=czulkosc/10
     corners = cv2.goodFeaturesToTrack(fgmask,punkty,czulkosc,silka)
     counter=counter%3
