@@ -51,6 +51,7 @@ fgbg = cv2.createBackgroundSubtractorMOG2()
 counter=0
 img_counter = 0
 dab=cv2.imread('download.png',1)
+koichi=cv2.imread('koichi.jpg',1)
 img=np.zeros((300,512,3),np.uint8)
 cv2.createTrackbar('Ilosc punktow','test',100,500,nothing)
 cv2.createTrackbar('Odleglosc pomiedzy punktami','test',10,255,nothing)
@@ -59,6 +60,7 @@ dystans=30
 if statusplota==1:
     plt.show()
 Figura=[[[272,554],[334,478],110],[[52,282],[426,464],490],[[19,104],[113,218],75]]
+Figura2=[[[365,235],[466,448],360],[[250,429],[169,140],170],[[126,273],[270,308],80],[[103,142],[154,272],30]]
 Hitboxy=[]
 Figury=[]
 procent='0%'
@@ -68,13 +70,14 @@ for x in Hitboxy:
     Figury.append(Hitboxy)
     
 while True:
-    dab = cv2.resize(dab, (640, 480)) 
+    koichi = cv2.resize(dab, (640, 480))
+    #koichi = cv2.resize(koichi, (640, 480)) 
     ########################################
     ret, frame = cam.read()
     frame=cv2.flip(frame, 1 )
     ########################################
     procent='Stopien pokrycia: '+procent
-    dst = cv2.addWeighted(frame,0.7,dab,0.3,0)  #Łączenie obrazu i nakładki z kanałem alpha
+    dst = cv2.addWeighted(frame,0.7,koichi,0.3,0)  #Łączenie obrazu i nakładki z kanałem alpha
     font = cv2.FONT_HERSHEY_SIMPLEX
     cv2.putText(dst,procent,(10,40), font, 1,(255,255,255),2,cv2.LINE_AA)
     # Display image
