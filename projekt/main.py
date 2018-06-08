@@ -41,60 +41,82 @@ def sprawdzhitboxa(Klasa,x,y):
         if (boola):
             return True
     return False
+def dodaj_hitboxa(tablica,pakiet):
+    Hitboxy=[]
+    for x in pakiet:
+        Hitboxy.append(core_prosta(x[0],x[1],x[2]))
+    tablica.append(Hitboxy)
+    return tablica
+def plotarmor(Figury,dx,dy,resztax,resztay,numerobrazu):
+    zplotuj(Figury[numerobrazu])
+    plt.plot(dx,dy,'*')
+    plt.plot(resztax,resztay,'*')
+    plt.axis([0,600,0,480])
+    plt.draw()
+    plt.pause(1e-17)
+    plt.clf()
+#############
+statusplota=1   #
+#############
 
-statusplota=1
 
-timer=0
+
 cam = cv2.VideoCapture(0)
 cv2.namedWindow("test")
 fgbg = cv2.createBackgroundSubtractorMOG2()
-counter=0
-img_counter = 0
-dab=cv2.imread('download.png',1)
-koichi=cv2.imread('koichi.jpg',1)
-img=np.zeros((300,512,3),np.uint8)
 cv2.createTrackbar('Ilosc punktow','test',100,500,nothing)
 cv2.createTrackbar('Odleglosc pomiedzy punktami','test',10,255,nothing)
 cv2.createTrackbar('Czulosc','test',3,10,nothing)
+cv2.createTrackbar('obraz','test',0,1,nothing)
+img=np.zeros((300,512,3),np.uint8)
+
+
+#Wyczytywanie obrazow
+dab=cv2.imread('download.png',1)
+koichi=cv2.imread('koichi.jpg',1)
+obrazy=[dab,koichi]
+
+Figury=[]
+timer=0
+counter=0
 dystans=30
+procent='0%'
+
+#Hitboxy
+Figura=[[[272,554],[334,478],110],[[52,282],[426,464],490],[[19,104],[113,218],75]]
+#############Tors###################Nogi#######################Ramie###################Dlon 
+Figura2=[[[235,365],[448,466],360],[[200,379],[140,169],170],[[126,273],[270,308],80],[[103,142],[154,272],30]]
+Figury=dodaj_hitboxa(Figury,Figura)
+Figury=dodaj_hitboxa(Figury,Figura2)
+
+
+#############
+numerobrazu=0    #Zmiana obrazu WIP
+#############
+
 if statusplota==1:
     plt.show()
-Figura=[[[272,554],[334,478],110],[[52,282],[426,464],490],[[19,104],[113,218],75]]
-Figura2=[[[365,235],[466,448],360],[[250,429],[169,140],170],[[126,273],[270,308],80],[[103,142],[154,272],30]]
-Hitboxy=[]
-Figury=[]
-procent='0%'
-for x in Figura:
-    Hitboxy.append(core_prosta(x[0],x[1],x[2]))
-for x in Hitboxy:
-    Figury.append(Hitboxy)
-    
+
 while True:
-    koichi = cv2.resize(dab, (640, 480))
-    #koichi = cv2.resize(koichi, (640, 480)) 
-    ########################################
-    ret, frame = cam.read()
+    obecny_obraz = cv2.resize(obrazy[numerobrazu], (640, 480))
+    ret, frame = cam.read() #czytanie obrazu z kamery
     frame=cv2.flip(frame, 1 )
-    ########################################
     procent='Stopien pokrycia: '+procent
-    dst = cv2.addWeighted(frame,0.7,koichi,0.3,0)  #Łączenie obrazu i nakładki z kanałem alpha
+    dst = cv2.addWeighted(frame,0.7,obecny_obraz,0.3,0)  #Łączenie obrazu i nakładki z kanałem alpha
     font = cv2.FONT_HERSHEY_SIMPLEX
     cv2.putText(dst,procent,(10,40), font, 1,(255,255,255),2,cv2.LINE_AA)
-    # Display image
-
     
+    cv2.imshow("test", dst) #Wyswietl obraz znakladka
     
-    cv2.imshow("test", dst)
     frame = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
     fgmask = fgbg.apply(frame)
     fgmask=cv2.flip(fgmask, 0 )
+    numerobrazu=cv2.getTrackbarPos('obraz','test')
     punkty=cv2.getTrackbarPos('Ilosc punktow','test')
-    silka=cv2.getTrackbarPos('Odleglosc pomiedzy punktami','test')
+    silka=cv2.getTrackbarPos('Odleglosc pomiedzy punktami','test')  #Usuwanie tla oraz czytanie suwakow
     czulkosc=cv2.getTrackbarPos('Czulosc','test')
     
-    if czulkosc==-1 or czulkosc==0:
-        #cam.release()
-        #cv2.destroyAllWindows() #Jezeli okno zostalo zamkniete
+    if czulkosc<=0:
         break
     
     czulkosc=czulkosc/10
@@ -108,14 +130,14 @@ while True:
     dy=[]           #resetowanie wartosci wyswietlanych na wizualizacji danych
     resztax=[]
     resztay=[]
-    odleglosc=30
+    #odleglosc=30
     
     try:    #dla 1-szej klatki trzeba zrobic wyjatek bo skrypt usuwania tla potrzebuje bufora
         for i in corners:
             x,y = i.ravel()
             ax.append(x)
             ay.append(y)
-            if(sprawdzhitboxa(Figury[0],x,y)):
+            if(sprawdzhitboxa(Figury[numerobrazu],x,y)):
                 dx.append(x)
                 dy.append(y)
             else:
@@ -125,25 +147,15 @@ while True:
         procenty=('{0:.1f}'.format(procenty))
         procent=str(procenty)+'%'
         if statusplota==1:
-            zplotuj(Figury[0])
-            plt.plot(dx,dy,'*')
-            plt.plot(resztax,resztay,'*')
-            plt.axis([0,600,0,480])
-            plt.draw()
-            plt.pause(1e-17)
-            plt.clf()
+            plotarmor(Figury,dx,dy,resztax,resztay,numerobrazu) #Funkcja zajmujaca sie plotami
     except:
         pass
     if not ret:
         break
-
-
     
     k = cv2.waitKey(1)
-
     if k%256 == 27:
-        # ESC pressed
-        print("Escape hit, closing...")
+        print("Zamykanie programu")
         break
     
 cam.release()
