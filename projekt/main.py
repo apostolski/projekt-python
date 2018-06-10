@@ -60,6 +60,9 @@ statusplota=0   #
 #############
 
 
+##DO ZROBIENIA:
+##SAMOCZYNNA ZMIANA OBRAZU
+
 
 cam = cv2.VideoCapture(0)
 cv2.namedWindow("test")
@@ -67,7 +70,6 @@ fgbg = cv2.createBackgroundSubtractorMOG2()
 cv2.createTrackbar('Ilosc punktow','test',100,500,nothing)
 cv2.createTrackbar('Odleglosc pomiedzy punktami','test',10,255,nothing)
 cv2.createTrackbar('Czulosc','test',3,10,nothing)
-cv2.createTrackbar('obraz','test',0,1,nothing)
 img=np.zeros((300,512,3),np.uint8)
 
 
@@ -75,13 +77,13 @@ img=np.zeros((300,512,3),np.uint8)
 dab=cv2.imread('download.png',1)
 koichi=cv2.imread('koichi.jpg',1)
 obrazy=[dab,koichi]
-
+start=0
 Figury=[]
 timer=0
 counter=0
 dystans=30
 procent='0%'
-
+Flagazmiany=0
 #Hitboxy
 Figura=[[[272,554],[334,478],110],[[52,282],[426,464],490],[[19,104],[113,218],75]]
 #############Tors###################Nogi#######################Ramie###################Dlon 
@@ -89,7 +91,7 @@ Figura2=[[[235,365],[448,466],360],[[200,379],[140,169],170],[[126,273],[270,308
 Figury=dodaj_hitboxa(Figury,Figura)
 Figury=dodaj_hitboxa(Figury,Figura2)
 
-
+dodatek=''
 #############
 numerobrazu=0    #Zmiana obrazu WIP
 #############
@@ -111,7 +113,6 @@ while True:
     frame = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
     fgmask = fgbg.apply(frame)
     fgmask=cv2.flip(fgmask, 0 )
-    numerobrazu=cv2.getTrackbarPos('obraz','test')
     punkty=cv2.getTrackbarPos('Ilosc punktow','test')
     silka=cv2.getTrackbarPos('Odleglosc pomiedzy punktami','test')  #Usuwanie tla oraz czytanie suwakow
     czulkosc=cv2.getTrackbarPos('Czulosc','test')
@@ -144,8 +145,24 @@ while True:
                 resztax.append(x)
                 resztay.append(y)
         procenty=(len(dx)*100/len(ax))
+        if procenty>90:
+            if ((time.time()-start)>1) and (Flagazmiany==1):
+                numerobrazu+=1
+                numerobrazu=numerobrazu%len(Figury)
+                Flagazmiany=0
+                dodatek=''
+                print(numerobrazu)
+            elif Flagazmiany==1:
+                dodatek='/n Tak trzymaj!'
+            else:
+                start=time.time()
+                dodatek=''
+                Flagazmiany=1
+        else:
+            Flagazmiany=False
+        
         procenty=('{0:.1f}'.format(procenty))
-        procent=str(procenty)+'%'
+        procent=str(procenty)+'%'+dodatek
         if statusplota==1:
             plotarmor(Figury,dx,dy,resztax,resztay,numerobrazu) #Funkcja zajmujaca sie plotami
     except:
